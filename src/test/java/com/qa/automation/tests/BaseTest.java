@@ -1,6 +1,8 @@
 package com.qa.automation.tests;
 
+import com.qa.automation.utils.ScreenshotUtils;
 import io.github.bonigarcia.wdm.WebDriverManager;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.openqa.selenium.WebDriver;
@@ -9,6 +11,10 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 /**
@@ -38,9 +44,24 @@ public class BaseTest {
 
     @AfterEach
     public void tearDown() {
-        logger.info("Closing WebDriver");
-        if (driver != null) {
-            driver.quit();
+        try {
+            // Take screenshot after test execution
+            String testName = this.getClass().getSimpleName() + "_" + 
+                Thread.currentThread().getStackTrace()[2].getMethodName();
+            String screenshotPath = ScreenshotUtils.takeScreenshot(driver, testName);
+            
+            // Attach screenshot to Allure report
+            if (screenshotPath != null) {
+                Path path = Paths.get(screenshotPath);
+                Allure.addAttachment("Screenshot", Files.newInputStream(path));
+            }
+        } catch (IOException e) {
+            logger.error("Failed to attach screenshot to Allure report", e);
+        } finally {
+            logger.info("Closing WebDriver");
+            if (driver != null) {
+                driver.quit();
+            }
         }
     }
 } 

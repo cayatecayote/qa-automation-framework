@@ -40,6 +40,9 @@ logs/
 allure-results/
 allure-report/
 
+# Screenshots
+target/screenshots/
+
 # System Files
 .DS_Store
 Thumbs.db 
